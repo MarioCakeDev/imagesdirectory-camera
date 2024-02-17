@@ -49,7 +49,7 @@ SNAPTOGIF_CREATE_SCHEMA = vol.Schema(
         vol.Optional(SERVCE_PARAM_ENDTIME, default=EPOCH_END): cv.matches_regex(
             r"[0-3][0-9]/[0-1][0-9]/\d{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9]"
         ),
-        vol.Optional(SERVICE_PARAM_LASTHOURS, default=0.0): cv.positive_float,,
+        vol.Optional(SERVICE_PARAM_LASTHOURS, default=0.0): cv.positive_float,
         vol.Optional(SERVICE_PARAM_DELAY_TIME, default=1.0): cv.positive_float,
     }
 )
