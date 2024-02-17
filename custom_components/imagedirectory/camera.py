@@ -73,7 +73,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_PATH): cv.isdir,
         vol.Optional(CONF_NAME, default=CONF_DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_DELAY_TIME, default=1.0): cv.positive_float,
+        vol.Optional(CONF_DELAY_TIME, default=0.0): cv.positive_float,
         vol.Optional(CONF_EXCLUDE, default=[]): cv.ensure_list,
         vol.Optional(CONF_PARAM_BEGINTIME, default=EPOCH_START): cv.matches_regex(
             r"[0-3][0-9]/[0-1][0-9]/\d{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9]"
@@ -283,10 +283,9 @@ class LocalFile(Camera):
     @property  # Baseclass Camera property override
     def frame_interval(self):
         """Return the interval between frames of the mjpeg stream"""
-        if self._delaytime < 0.01666:
-            return 0.01666
-        else:
+        if self._delaytime == 0:
             return super().frame_interval
+        return self._delaytime
 
     def load_next_image(self):
         if self._NoImages > 0:
