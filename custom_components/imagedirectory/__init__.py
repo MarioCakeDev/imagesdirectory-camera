@@ -23,6 +23,7 @@ SERVICE_DEL = "delete_files"
 SERVICE_MOVE = "move_files"
 
 SERVICE_PARAM_SOURCE = "sourcepath"
+SERVICE_PARAM_DELAY_TIME = "delay_time"
 SERVICE_PARAM_DESTINATION = "destinationpath"
 SERVICE_PARAM_FILENAME = "filename"
 SERVICE_PARAM_FORMAT = "format"
@@ -48,7 +49,8 @@ SNAPTOGIF_CREATE_SCHEMA = vol.Schema(
         vol.Optional(SERVCE_PARAM_ENDTIME, default=EPOCH_END): cv.matches_regex(
             r"[0-3][0-9]/[0-1][0-9]/\d{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9]"
         ),
-        vol.Optional(SERVICE_PARAM_LASTHOURS, default=0.0): cv.positive_float,
+        vol.Optional(SERVICE_PARAM_LASTHOURS, default=0.0): cv.positive_float,,
+        vol.Optional(SERVICE_PARAM_DELAY_TIME, default=1.0): cv.positive_float,
     }
 )
 
@@ -138,8 +140,9 @@ def createOutputfile(hass, call, files):
         # sort images on modified date
         files.sort(key=lambda x: os.path.getmtime(os.path.join(inputfolder, x)))
         # convert frames to destination format (GIF/MP3)
+        fps = 1 / call.data[SERVICE_PARAM_DELAY_TIME]
         writer = imageio.get_writer(
-            os.path.join(outputfolder, outputfile), mode="I", fps=1
+            os.path.join(outputfolder, outputfile), mode="I", fps=fps
         )
         for file in files:
             writer.append_data(imageio.imread(os.path.join(inputfolder, file)))
