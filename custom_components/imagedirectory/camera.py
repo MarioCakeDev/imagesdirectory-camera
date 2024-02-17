@@ -283,8 +283,8 @@ class LocalFile(Camera):
     @property  # Baseclass Camera property override
     def frame_interval(self):
         """Return the interval between frames of the mjpeg stream"""
-        if self._delaytime < 0.5:
-            return 0.05
+        if self._delaytime < 0.01666:
+            return 0.01666
         else:
             return super().frame_interval
 
