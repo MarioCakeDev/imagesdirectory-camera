@@ -11,6 +11,7 @@ import shutil
 import time
 import datetime
 import imageio
+import numpy
 
 
 DOMAIN = "imagedirectory"
