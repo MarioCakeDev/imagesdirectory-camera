@@ -144,10 +144,10 @@ def createOutputfile(hass, call, files):
     target_size = call.data[SERVICE_PARAM_TARGET_SIZE]
     if target_size:
         target_size = target_size.split(":")
-        if target_size[0] == 0:
+        if target_size[0] == "0":
             target_size = None
         else:
-            target_size = (target_size[0], target_size[1])
+            target_size = (int(target_size[0]), int(target_size[1]))
     
     try:
         # sort images on modified date
