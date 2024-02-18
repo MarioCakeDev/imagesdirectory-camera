@@ -7,7 +7,7 @@
                   "pillow",
                   "imageio",
                   "imageio-ffmpeg",
-                  "opencv"
+                  "opencv-python"
                 ],
   "dependencies": [],
   "codeowners": ["@jodur", "@MarioCake"]
