@@ -164,7 +164,7 @@ def createOutputfile(hass, call, files):
             img = imageio.imread(os.path.join(inputfolder, file))
             
             if img.shape[0] != biggest_size[0]:
-                img = numpy.array(Image.fromarray(img).resize((height, width)))
+                img = numpy.array(Image.fromarray(img).resize((width, height)))
             
             writer.append_data(img)
         writer.close()
