@@ -152,12 +152,19 @@ def createOutputfile(hass, call, files):
             img = imageio.imread(os.path.join(inputfolder, file))
             if biggest_size[0] < img.shape[0]:
                 biggest_size = img.shape
+
+        block_size = 16
+        width = biggest_size[0] - (biggest_size[0] % block_size)
+        height = biggest_size[1] - (biggest_size[1] % block_size)
+
+        if height > width:
+            (width, height) = (height, width)
         
         for file in files:
             img = imageio.imread(os.path.join(inputfolder, file))
-
+            
             if img.shape[0] != biggest_size[0]:
-                img = numpy.array(Image.fromarray(img).resize((biggest_size[0] - (biggest_size[0] % 16), biggest_size[1] - (biggest_size[1] % 16))))
+                img = numpy.array(Image.fromarray(img).resize((height, width)))
             
             writer.append_data(img)
         writer.close()
