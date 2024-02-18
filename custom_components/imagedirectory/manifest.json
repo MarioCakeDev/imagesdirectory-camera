@@ -1,13 +1,14 @@
 {
   "domain": "imagedirectory",
   "name": "Local Image Filelist",
-  "version": "0.6.1",
-  "documentation": "https://github.com/jodur/imagedirectory-camera",
+  "version": "0.7.0",
+  "documentation": "https://github.com/MarioCakeDev/imagesdirectory-camera",
   "requirements": [
                   "pillow",
                   "imageio",
-                  "imageio-ffmpeg"
-                  ],
+                  "imageio-ffmpeg",
+                  "opencv"
+                ],
   "dependencies": [],
-  "codeowners": ["@jodur"]
+  "codeowners": ["@jodur", "@MarioCake"]
 }
