@@ -4,10 +4,11 @@
   "version": "0.7.0",
   "documentation": "https://github.com/MarioCakeDev/imagesdirectory-camera",
   "requirements": [
-                  "pillow",
-                  "imageio",
-                  "imageio-ffmpeg"
-                ],
+    "pillow",
+    "imageio",
+    "imageio-ffmpeg",
+    "numpy"
+  ],
   "dependencies": [],
   "codeowners": ["@jodur", "@MarioCake"]
 }
