@@ -144,8 +144,20 @@ def createOutputfile(hass, call, files):
         writer = imageio.get_writer(
             os.path.join(outputfolder, outputfile), mode="I", fps=fps
         )
+
+        biggest_size = (0, 0, 0)
         for file in files:
-            writer.append_data(imageio.imread(os.path.join(inputfolder, file)))
+            img = imageio.imread(os.path.join(inputfolder, file))
+            if biggest_size[0] > img.shape[0]:
+                biggest_size = img.shape
+        
+        for file in files:
+            img = imageio.imread(os.path.join(inputfolder, file))
+
+            if img.shape[0] < biggest_size[0]:
+                img.resize((biggest_size[0], biggest_size[1]))
+            
+            writer.append_data(img)
         writer.close()
 
         _LOGGER.info(f"{outputfile} succesfully generated in: {outputfolder}")
