@@ -31,6 +31,7 @@ SERVICE_PARAM_FILENAME = "filename"
 SERVICE_PARAM_FORMAT = "format"
 SERVICE_PARAM_EXCLUDE = CONF_EXCLUDE
 SERVICE_PARAM_BEGINTIME = "begintimestamp"
+SERVICE_PARAM_TARGET_SIZE = "target_size"
 SERVCE_PARAM_ENDTIME = "endtimestamp"
 SERVICE_PARAM_LASTHOURS = "lasthours"
 EPOCH_START = "01/01/1970 00:00:00"
@@ -53,6 +54,7 @@ SNAPTOGIF_CREATE_SCHEMA = vol.Schema(
         ),
         vol.Optional(SERVICE_PARAM_LASTHOURS, default=0.0): cv.positive_float,
         vol.Optional(SERVICE_PARAM_DELAY_TIME, default=1.0): cv.positive_float,
+        vol.Optional(SERVICE_PARAM_TARGET_SIZE, default=0.0): cv.matches_regex(r"[0-9]{1,6}:[0-9]{1,6}"),
     }
 )
 
@@ -80,7 +82,7 @@ SNAPTOGIF_MOVE_SCHEMA = vol.Schema(
         vol.Optional(SERVCE_PARAM_ENDTIME, default=EPOCH_END): cv.matches_regex(
             r"[0-3][0-9]/[0-1][0-9]/\d{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9]"
         ),
-        vol.Optional(SERVICE_PARAM_LASTHOURS, default=0.0): cv.positive_float,
+        vol.Optional(SERVICE_PARAM_LASTHOURS, default=0.0): cv.positive_float
     }
 )
 
@@ -138,6 +140,12 @@ def createOutputfile(hass, call, files):
         f"{call.data[SERVICE_PARAM_FILENAME]}.{call.data[SERVICE_PARAM_FORMAT]}"
     )
     outputfolder = call.data[SERVICE_PARAM_DESTINATION]
+
+    target_size = call.data[SERVICE_PARAM_TARGET_SIZE]
+    if target_size:
+        target_size = target_size.split(":")
+        target_size = (target_size[0])
+    
     try:
         # sort images on modified date
         files.sort(key=lambda x: os.path.getmtime(os.path.join(inputfolder, x)))
@@ -147,18 +155,22 @@ def createOutputfile(hass, call, files):
             os.path.join(outputfolder, outputfile), mode="I", fps=fps
         )
 
-        biggest_size = (0, 0, 0)
-        for file in files:
-            img = imageio.imread(os.path.join(inputfolder, file))
-            if biggest_size[0] < img.shape[0]:
-                biggest_size = img.shape
-
-        block_size = 16
-        width = biggest_size[0] - (biggest_size[0] % block_size)
-        height = biggest_size[1] - (biggest_size[1] % block_size)
-
-        if height > width:
-            (width, height) = (height, width)
+        if not target_size:
+            biggest_size = (0, 0, 0)
+            for file in files:
+                img = imageio.imread(os.path.join(inputfolder, file))
+                if biggest_size[0] < img.shape[0]:
+                    biggest_size = img.shape
+    
+            block_size = 16
+            width = biggest_size[0] - (biggest_size[0] % block_size)
+            height = biggest_size[1] - (biggest_size[1] % block_size)
+    
+            if height > width:
+                (width, height) = (height, width)
+        else:
+            width = target_size[0]
+            height = target_size[1]
         
         for file in files:
             img = imageio.imread(os.path.join(inputfolder, file))
