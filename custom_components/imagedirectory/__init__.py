@@ -54,7 +54,7 @@ SNAPTOGIF_CREATE_SCHEMA = vol.Schema(
         ),
         vol.Optional(SERVICE_PARAM_LASTHOURS, default=0.0): cv.positive_float,
         vol.Optional(SERVICE_PARAM_DELAY_TIME, default=1.0): cv.positive_float,
-        vol.Optional(SERVICE_PARAM_TARGET_SIZE, default=0.0): cv.matches_regex(r"[0-9]{1,6}:[0-9]{1,6}"),
+        vol.Optional(SERVICE_PARAM_TARGET_SIZE, default="0:0"): cv.matches_regex(r"[0-9]{1,6}:[0-9]{1,6}"),
     }
 )
 
@@ -144,7 +144,10 @@ def createOutputfile(hass, call, files):
     target_size = call.data[SERVICE_PARAM_TARGET_SIZE]
     if target_size:
         target_size = target_size.split(":")
-        target_size = (target_size[0])
+        if target_size[0] == 0:
+            target_size = None
+        else:
+            target_size = (target_size[0], target_size[1])
     
     try:
         # sort images on modified date
