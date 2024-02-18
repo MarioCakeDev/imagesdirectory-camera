@@ -149,7 +149,7 @@ def createOutputfile(hass, call, files):
         biggest_size = (0, 0, 0)
         for file in files:
             img = imageio.imread(os.path.join(inputfolder, file))
-            if biggest_size[0] > img.shape[0]:
+            if biggest_size[0] < img.shape[0]:
                 biggest_size = img.shape
         
         for file in files:
