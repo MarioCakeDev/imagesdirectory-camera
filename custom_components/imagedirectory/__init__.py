@@ -11,6 +11,8 @@ import shutil
 import time
 import datetime
 import imageio
+import cv2
+
 
 DOMAIN = "imagedirectory"
 
@@ -155,7 +157,7 @@ def createOutputfile(hass, call, files):
             img = imageio.imread(os.path.join(inputfolder, file))
 
             if img.shape[0] < biggest_size[0]:
-                img.resize((biggest_size[0], biggest_size[1]))
+                img = cv2.resize(img, (biggest_size[0], biggest_size[1]))
             
             writer.append_data(img)
         writer.close()
