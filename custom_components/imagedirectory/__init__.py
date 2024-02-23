@@ -26,6 +26,7 @@ SERVICE_MOVE = "move_files"
 
 SERVICE_PARAM_SOURCE = "sourcepath"
 SERVICE_PARAM_DELAY_TIME = "delay_time"
+SERVICE_PARAM_MAX_FPS = "max_fps"
 SERVICE_PARAM_DESTINATION = "destinationpath"
 SERVICE_PARAM_FILENAME = "filename"
 SERVICE_PARAM_FORMAT = "format"
@@ -54,6 +55,7 @@ SNAPTOGIF_CREATE_SCHEMA = vol.Schema(
         ),
         vol.Optional(SERVICE_PARAM_LASTHOURS, default=0.0): cv.positive_float,
         vol.Optional(SERVICE_PARAM_DELAY_TIME, default=1.0): cv.positive_float,
+        vol.Optional(SERVICE_PARAM_MAX_FPS, default=60): cv.positive_float,
         vol.Optional(SERVICE_PARAM_TARGET_SIZE, default="0:0"): cv.matches_regex(r"[0-9]{1,6}:[0-9]{1,6}"),
     }
 )
@@ -112,8 +114,7 @@ def Getfileslist(path, exclude, begintime, endtime, extensions, lasthours=0.0):
     files = [
         file
         for file in files
-        if GetTimestampFile(path, file) >= BeginTimeStamp
-        and GetTimestampFile(path, file) <= EndTimeStamp
+        if BeginTimeStamp <= GetTimestampFile(path, file) <= EndTimeStamp
     ]
 
     # sort images on modified date
@@ -127,8 +128,7 @@ def Getfileslist(path, exclude, begintime, endtime, extensions, lasthours=0.0):
         files = [
             file
             for file in files
-            if GetTimestampFile(path, file) >= (latest - (lasthours * 3600))
-            and GetTimestampFile(path, file) <= EndTimeStamp
+            if (latest - (lasthours * 3600)) <= GetTimestampFile(path, file) <= EndTimeStamp
         ]
     return files
 
@@ -148,12 +148,28 @@ def createOutputfile(hass, call, files):
             target_size = None
         else:
             target_size = (int(target_size[0]), int(target_size[1]))
-    
+
+    target_fps = 1 / call.data[SERVICE_PARAM_DELAY_TIME]
+    fps = min(target_fps, call.data[SERVICE_PARAM_MAX_FPS])
+
+    percentage_of_fps_to_remove = 1 - (fps / target_fps)
+
+    new_files = []
+    remove_factor = 0
+    for i in range(len(files)):
+        remove_factor += percentage_of_fps_to_remove
+        is_last_file = i == len(files) - 1
+        if remove_factor >= 1 and not is_last_file:
+            remove_factor -= 1
+            new_files.append(files[i])
+
+    files = new_files
+
     try:
         # sort images on modified date
         files.sort(key=lambda x: os.path.getmtime(os.path.join(inputfolder, x)))
         # convert frames to destination format (GIF/MP3)
-        fps = 1 / call.data[SERVICE_PARAM_DELAY_TIME]
+
         writer = imageio.get_writer(
             os.path.join(outputfolder, outputfile), mode="I", fps=fps
         )
@@ -174,14 +190,18 @@ def createOutputfile(hass, call, files):
         else:
             width = target_size[0]
             height = target_size[1]
-        
+
         for file in files:
-            img = imageio.imread(os.path.join(inputfolder, file))
-            
-            if img.shape[0] != width or img.shape[1] != height:
-                img = numpy.array(Image.fromarray(img).resize((width, height)))
-            
-            writer.append_data(img)
+            try:
+                img = imageio.imread(os.path.join(inputfolder, file))
+
+                if img.shape[0] != width or img.shape[1] != height:
+                    img = numpy.array(Image.fromarray(img).resize((width, height)))
+
+                writer.append_data(img)
+            except Exception as e:
+                _LOGGER.warning(f"Error processing file and skipping: {file} error: {str(e)}")
+
         writer.close()
 
         _LOGGER.info(f"{outputfile} succesfully generated in: {outputfolder}")
