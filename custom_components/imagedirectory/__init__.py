@@ -161,7 +161,8 @@ def createOutputfile(hass, call, files):
         is_last_file = i == len(files) - 1
         if remove_factor >= 1 and not is_last_file:
             remove_factor -= 1
-            new_files.append(files[i])
+            continue
+        new_files.append(files[i])
 
     files = new_files
 
